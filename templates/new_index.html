@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WiFi Security Analyzer</title>
+
+<style>
+
+body {
+margin: 0;
+font-family: 'Segoe UI', sans-serif;
+background: #0f172a;
+color: white;
+}
+
+.container {
+max-width: 1100px;
+margin: auto;
+padding: 20px;
+}
+
+h2 {
+text-align: center;
+margin-bottom: 5px;
+}
+
+.subtitle {
+text-align: center;
+color: #94a3b8;
+margin-bottom: 10px;
+}
+
+/* Scan Button */
+.scan-btn{
+margin: 10px auto 20px;
+display:block;
+padding:10px 20px;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.scan-btn:hover{
+background:#1d4ed8;
+}
+
+/* Cards */
+.cards {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 15px;
+margin-bottom: 25px;
+}
+
+.card {
+padding: 20px;
+border-radius: 12px;
+text-align: center;
+font-size: 18px;
+font-weight: bold;
+}
+
+.total { background: #1e293b; }
+.safe-card { background: #065f46; }
+.moderate-card { background: #92400e; }
+.high-card { background: #7f1d1d; }
+
+/* Graph */
+.graph{
+margin:30px 0;
+text-align:left;
+}
+
+.bar{
+height:10px;
+margin-bottom:10px;
+border-radius:5px;
+}
+
+.safe-bar{ background:#22c55e; }
+.moderate-bar{ background:#f59e0b; }
+.high-bar{ background:#ef4444; }
+
+/* Table */
+table {
+width: 100%;
+border-collapse: collapse;
+border-radius: 10px;
+overflow: hidden;
+}
+
+th {
+background: #020617;
+padding: 12px;
+}
+
+td {
+padding: 10px;
+background: #1e293b;
+}
+
+tr:nth-child(even) td {
+background: #334155;
+}
+
+/* Colors */
+.safe { color: #22c55e; font-weight: bold; }
+.moderate { color: #f59e0b; font-weight: bold; }
+.high { color: #ef4444; font-weight: bold; }
+
+.footer {
+text-align: center;
+margin-top: 20px;
+color: #94a3b8;
+font-size: 12px;
+}
+
+#loading{
+text-align:center;
+color:#94a3b8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🔐 WiFi Security Analyzer Dashboard</h2>
+<p class="subtitle">Real-time monitoring of nearby networks</p>
+
+<p id="loading">🔍 Scanning networks...</p>
+
+<button onclick="location.reload()" class="scan-btn">🔄 Scan Now</button>
+
+<!-- Cards -->
+<div class="cards">
+
+<div class="card total">
+Total<br>{{networks|length}}
+</div>
+
+<div class="card safe-card">
+Safe<br>{{networks | selectattr('security','equalto','Safe') | list | length}}
+</div>
+
+<div class="card moderate-card">
+Moderate<br>{{networks | selectattr('security','equalto','Moderate') | list | length}}
+</div>
+
+<div class="card high-card">
+High Risk<br>{{networks | selectattr('security','equalto','High Risk') | list | length}}
+</div>
+
+</div>
+
+<!-- Graph -->
+<div class="graph">
+<h3>📊 Network Risk Overview</h3>
+
+<div>Safe: {{networks | selectattr('security','equalto','Safe') | list | length}}</div>
+<div class="bar safe-bar" style="width: {{ (networks | selectattr('security','equalto','Safe') | list | length)*30 }}px;"></div>
+
+<div>Moderate: {{networks | selectattr('security','equalto','Moderate') | list | length}}</div>
+<div class="bar moderate-bar" style="width: {{ (networks | selectattr('security','equalto','Moderate') | list | length)*30 }}px;"></div>
+
+<div>High Risk: {{networks | selectattr('security','equalto','High Risk') | list | length}}</div>
+<div class="bar high-bar" style="width: {{ (networks | selectattr('security','equalto','High Risk') | list | length)*30 }}px;"></div>
+
+</div>
+
+<!-- Table -->
+<table>
+
+<tr>
+<th>Network</th>
+<th>Encryption</th>
+<th>Risk</th>
+<th>Security</th>
+<th>Warning</th>
+</tr>
+
+{% for n in networks %}
+
+<tr>
+<td>{{n.ssid}}</td>
+<td>{{n.encryption}}</td>
+<td>{{n.risk}}</td>
+
+<td class="{% if n.security=='Safe' %}safe{% elif n.security=='Moderate' %}moderate{% else %}high{% endif %}">
+{{n.security}}
+</td>
+
+<td>{{n.warning}}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<p class="footer">
+Auto-refresh every 10 seconds • Powered by pywifi
+</p>
+
+</div>
+
+<script>
+setTimeout(() => {
+document.getElementById("loading").style.display = "none";
+}, 2000);
+</script>
+
+</body>
+</html>
